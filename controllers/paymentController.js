@@ -259,8 +259,8 @@ export const verifyPayment = catchAsyncError(async (req, res, next) => {
       paymentMethod: 'card', // Set to card for all Razorpay payments
       promoCode,
       paymentStatus: 'paid', // Payment is already processed via Razorpay
-      orderStatus: 'pending_vendor_response', // Start with pending vendor response
-      isPendingVendorResponse: true, // Set pending flag
+      orderStatus: 'confirmed', // Start with pending vendor response
+      isPendingVendorResponse: false, // Set pending flag
       vendorResponseDeadline: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes for vendor response
       subtotal: 0, // Will be calculated
       total: 0, // Will be calculated
