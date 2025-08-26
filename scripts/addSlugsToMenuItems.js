@@ -1,16 +1,16 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import MenuItem from '../models/MenuItem.js';
-import { generateMenuItemSlug, ensureUniqueSlug } from '../utils/slugUtils.js';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import MenuItem from "../models/MenuItem.js";
+import { generateMenuItemSlug, ensureUniqueSlug } from "../utils/slugUtils.js";
 
 // Load environment variables
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: "./config.env" });
 
 const addSlugsToMenuItems = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
 
     // Get all menu items that don't have slugs
     const menuItems = await MenuItem.find({ slug: { $exists: false } });
@@ -42,13 +42,12 @@ const addSlugsToMenuItems = async () => {
     }
 
     console.log(`\nSuccessfully updated ${updatedCount} menu items with slugs`);
-
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   } finally {
     // Close the connection
     await mongoose.connection.close();
-    console.log('Database connection closed');
+    console.log("Database connection closed");
   }
 };
 
