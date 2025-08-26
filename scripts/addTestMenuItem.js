@@ -1,22 +1,22 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import MenuItem from '../models/MenuItem.js';
-import Vendor from '../models/Vendor.js';
-import { generateMenuItemSlug } from '../utils/slugUtils.js';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import MenuItem from "../models/MenuItem.js";
+import Vendor from "../models/Vendor.js";
+import { generateMenuItemSlug } from "../utils/slugUtils.js";
 
 // Load environment variables
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: "./config.env" });
 
 const addTestMenuItem = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log('Connected to MongoDB');
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
 
     // Get the first vendor
     const vendor = await Vendor.findOne();
     if (!vendor) {
-      console.log('No vendor found. Please seed the database first.');
+      console.log("No vendor found. Please seed the database first.");
       return;
     }
 
@@ -32,7 +32,7 @@ const addTestMenuItem = async () => {
       image: "/images/pav_bhaji.jpg",
       vendorId: vendor._id,
       category: "Test Items",
-      isAvailable: true
+      isAvailable: true,
     };
 
     // Check if item already exists
@@ -40,7 +40,9 @@ const addTestMenuItem = async () => {
     if (existingItem) {
       console.log(`Test item with slug "${testItem.slug}" already exists`);
       console.log(`Item ID: ${existingItem._id}`);
-      console.log(`You can test it at: http://localhost:3001/items/${testItem.slug}`);
+      console.log(
+        `You can test it at: http://localhost:3001/items/${testItem.slug}`
+      );
       return;
     }
 
@@ -49,14 +51,15 @@ const addTestMenuItem = async () => {
     console.log(`Created test menu item: ${createdItem.name}`);
     console.log(`Slug: ${createdItem.slug}`);
     console.log(`Item ID: ${createdItem._id}`);
-    console.log(`You can test it at: http://localhost:3001/items/${createdItem.slug}`);
-    
+    console.log(
+      `You can test it at: http://localhost:3001/items/${createdItem.slug}`
+    );
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   } finally {
     // Close the connection
     await mongoose.connection.close();
-    console.log('Database connection closed');
+    console.log("Database connection closed");
   }
 };
 

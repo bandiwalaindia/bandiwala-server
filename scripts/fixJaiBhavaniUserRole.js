@@ -1,15 +1,17 @@
-import mongoose from 'mongoose';
-import { User } from '../models/usermodel.js';
-import { config } from 'dotenv';
+import mongoose from "mongoose";
+import { User } from "../models/usermodel.js";
+import { config } from "dotenv";
 
 // Load environment variables
-config({ path: './config.env' });
+config({ path: "./config.env" });
 
 const fixJaiBhavaniUserRole = async () => {
   try {
     // Connect to database
-    const URI = process.env.MONGO_URL || "mongodb+srv://bandiwala:karthik@bandiwala.lyx1xbj.mongodb.net/bandiwala?retryWrites=true&w=majority";
-    
+    const URI =
+      process.env.MONGODB_URI ||
+      "mongodb+srv://bandiwala:karthik@bandiwala.lyx1xbj.mongodb.net/bandiwala?retryWrites=true&w=majority";
+
     const options = {
       serverSelectionTimeoutMS: 30000,
       socketTimeoutMS: 45000,
@@ -24,10 +26,7 @@ const fixJaiBhavaniUserRole = async () => {
 
     // Find user with phone number 9876543210 (with or without +91 prefix)
     const existingUser = await User.findOne({
-      $or: [
-        { phone: "9876543210" },
-        { phone: "+919876543210" }
-      ]
+      $or: [{ phone: "9876543210" }, { phone: "+919876543210" }],
     });
 
     if (existingUser) {
@@ -46,7 +45,7 @@ const fixJaiBhavaniUserRole = async () => {
       existingUser.isBlocked = false;
 
       await existingUser.save();
-      
+
       console.log("✅ Successfully updated user:");
       console.log(`   Name: ${existingUser.name}`);
       console.log(`   Email: ${existingUser.email}`);
@@ -55,9 +54,11 @@ const fixJaiBhavaniUserRole = async () => {
       console.log(`   Account Verified: ${existingUser.accountVerified}`);
       console.log(`   Approved: ${existingUser.isApproved}`);
     } else {
-      console.log("❌ No user found with phone number 9876543210 or +919876543210");
+      console.log(
+        "❌ No user found with phone number 9876543210 or +919876543210"
+      );
       console.log("🔄 Creating new vendor user...");
-      
+
       // Create new vendor user
       const newUser = await User.create({
         name: "Jai Bhavani Chat Owner",
@@ -77,10 +78,10 @@ const fixJaiBhavaniUserRole = async () => {
       console.log(`   Role: ${newUser.role}`);
     }
 
-    console.log('✅ Jai Bhavani Chat Owner role fixed successfully');
+    console.log("✅ Jai Bhavani Chat Owner role fixed successfully");
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error fixing Jai Bhavani user role:', error);
+    console.error("❌ Error fixing Jai Bhavani user role:", error);
     process.exit(1);
   }
 };
