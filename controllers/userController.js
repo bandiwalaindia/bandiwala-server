@@ -20,10 +20,9 @@ export const register = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("All fields are required.", 400));
     }
     function validatePhoneNumber(phone) {
-      const phoneRegex =/^\+91[0-9]{10}$/;
+      const phoneRegex = /^\+91[0-9]{10}$/;
       return phoneRegex.test(phone);
     }
-
 
     if (!validatePhoneNumber(phone)) {
       return next(new ErrorHandler("Invalid phone number.", 400));
@@ -63,12 +62,16 @@ export const register = catchAsyncError(async (req, res, next) => {
       if (password) {
         existingUnverifiedUser.password = password;
       }
-      if (role && ['user', 'vendor', 'deliveryPartner', 'admin'].includes(role)) {
+      if (
+        role &&
+        ["user", "vendor", "deliveryPartner", "admin"].includes(role)
+      ) {
         existingUnverifiedUser.role = role;
       }
 
       // Generate new verification code
-      const verificationCode = await existingUnverifiedUser.generateVerificationCode();
+      const verificationCode =
+        await existingUnverifiedUser.generateVerificationCode();
       await existingUnverifiedUser.save();
 
       console.log(`Resending OTP to existing unverified user: ${email}`);
@@ -79,27 +82,33 @@ export const register = catchAsyncError(async (req, res, next) => {
         console.log(`Verification code: ${verificationCode}`);
 
         // Development mode: Always log OTP to console for testing
-        console.log('='.repeat(50));
-        console.log('🔐 DEVELOPMENT OTP FOR EXISTING USER 🔐');
+        console.log("=".repeat(50));
+        console.log("🔐 DEVELOPMENT OTP FOR EXISTING USER 🔐");
         console.log(`📧 Email: ${email}`);
         console.log(`📱 Phone: ${phone}`);
         console.log(`🔢 OTP: ${verificationCode}`);
         console.log(`⏰ Expires in: 10 minutes`);
-        console.log('='.repeat(50));
+        console.log("=".repeat(50));
 
         if (verificationMethod === "email") {
           console.log(`Sending email OTP to existing user: ${email}`);
           const message = generateEmailTemplate(verificationCode);
-          const emailResult = await sendEmail({ email, subject: "Your Verification Code", message });
+          const emailResult = await sendEmail({
+            email,
+            subject: "Your Verification Code",
+            message,
+          });
 
           if (emailResult) {
-            console.log('Email sent successfully to existing user');
+            console.log("Email sent successfully to existing user");
             res.status(200).json({
               success: true,
               message: `Account found! New verification email sent to ${email}. Please verify your account.`,
             });
           } else {
-            console.log('Email sending failed for existing user - but registration successful');
+            console.log(
+              "Email sending failed for existing user - but registration successful"
+            );
             res.status(200).json({
               success: true,
               message: `Account found! Check server console for OTP (Email: ${email}). OTP: ${verificationCode}`,
@@ -109,12 +118,21 @@ export const register = catchAsyncError(async (req, res, next) => {
           console.log(`Sending SMS OTP to existing user: ${phone}`);
 
           // Check if we have valid Twilio credentials and purchased phone number
-          if (!process.env.TWILIO_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER ||
-              process.env.TWILIO_SID === 'YOUR_ACTUAL_TWILIO_ACCOUNT_SID' ||
-              process.env.TWILIO_PHONE_NUMBER === '+917416467890') {
-            console.log('⚠️  Twilio credentials not configured - using development mode for existing user');
-            console.log('📱 SMS would be sent to:', phone);
-            console.log('📝 SMS content:', `Your Bandiwala verification code is: ${verificationCode}. This code will expire in 10 minutes.`);
+          if (
+            !process.env.TWILIO_SID ||
+            !process.env.TWILIO_AUTH_TOKEN ||
+            !process.env.TWILIO_PHONE_NUMBER ||
+            process.env.TWILIO_SID === "YOUR_ACTUAL_TWILIO_ACCOUNT_SID" ||
+            process.env.TWILIO_PHONE_NUMBER === "+917416467890"
+          ) {
+            console.log(
+              "⚠️  Twilio credentials not configured - using development mode for existing user"
+            );
+            console.log("📱 SMS would be sent to:", phone);
+            console.log(
+              "📝 SMS content:",
+              `Your Bandiwala verification code is: ${verificationCode}. This code will expire in 10 minutes.`
+            );
 
             res.status(200).json({
               success: true,
@@ -127,7 +145,10 @@ export const register = catchAsyncError(async (req, res, next) => {
               to: phone,
             });
 
-            console.log('SMS sent successfully to existing user:', smsResult.sid);
+            console.log(
+              "SMS sent successfully to existing user:",
+              smsResult.sid
+            );
             res.status(200).json({
               success: true,
               message: `Account found! New OTP sent to ${phone}. Please verify your account.`,
@@ -140,7 +161,10 @@ export const register = catchAsyncError(async (req, res, next) => {
           });
         }
       } catch (error) {
-        console.error('Error sending verification code to existing user:', error);
+        console.error(
+          "Error sending verification code to existing user:",
+          error
+        );
         return res.status(500).json({
           success: false,
           message: "Failed to send verification code. Please try again.",
@@ -175,7 +199,7 @@ export const register = catchAsyncError(async (req, res, next) => {
     };
 
     // Add role if provided and valid
-    if (role && ['user', 'vendor', 'deliveryPartner', 'admin'].includes(role)) {
+    if (role && ["user", "vendor", "deliveryPartner", "admin"].includes(role)) {
       userData.role = role;
     }
 
@@ -208,31 +232,37 @@ async function sendVerificationCode(
     console.log(`Verification code: ${verificationCode}`);
 
     // Development mode: Always log OTP to console for testing
-    console.log('='.repeat(50));
-    console.log('🔐 DEVELOPMENT OTP FOR TESTING 🔐');
+    console.log("=".repeat(50));
+    console.log("🔐 DEVELOPMENT OTP FOR TESTING 🔐");
     console.log(`📧 Email: ${email}`);
     console.log(`📱 Phone: ${phone}`);
     console.log(`🔢 OTP: ${verificationCode}`);
     console.log(`⏰ Expires in: 10 minutes`);
-    console.log('='.repeat(50));
+    console.log("=".repeat(50));
 
     if (verificationMethod === "email") {
       console.log(`Sending email OTP to: ${email}`);
       const message = generateEmailTemplate(verificationCode);
-      const emailResult = await sendEmail({ email, subject: "Your Verification Code", message });
+      const emailResult = await sendEmail({
+        email,
+        subject: "Your Verification Code",
+        message,
+      });
 
       if (emailResult) {
-        console.log('Email sent successfully');
+        console.log("Email sent successfully");
         res.status(200).json({
           success: true,
           message: `Verification email successfully sent to ${email}`,
         });
       } else {
-        console.log('Email sending failed - but registration successful');
-        console.log('🔐 DEVELOPMENT MODE: Email not configured, but user created successfully');
+        console.log("Email sending failed - but registration successful");
+        console.log(
+          "🔐 DEVELOPMENT MODE: Email not configured, but user created successfully"
+        );
         console.log(`📧 Email: ${email}`);
         console.log(`🔢 OTP: ${verificationCode}`);
-        console.log('⏰ Use this OTP to verify your account');
+        console.log("⏰ Use this OTP to verify your account");
 
         // In development, still return success but with a different message
         res.status(200).json({
@@ -245,12 +275,21 @@ async function sendVerificationCode(
       console.log(`Using Twilio number: ${process.env.TWILIO_PHONE_NUMBER}`);
 
       // Check if we have valid Twilio credentials and purchased phone number
-      if (!process.env.TWILIO_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER ||
-          process.env.TWILIO_SID === 'YOUR_ACTUAL_TWILIO_ACCOUNT_SID' ||
-          process.env.TWILIO_PHONE_NUMBER === '+917416467890') {
-        console.log('⚠️  Twilio credentials not configured - using development mode');
-        console.log('📱 SMS would be sent to:', phone);
-        console.log('📝 SMS content:', `Your Bandiwala verification code is: ${verificationCode}. This code will expire in 10 minutes.`);
+      if (
+        !process.env.TWILIO_SID ||
+        !process.env.TWILIO_AUTH_TOKEN ||
+        !process.env.TWILIO_PHONE_NUMBER ||
+        process.env.TWILIO_SID === "YOUR_ACTUAL_TWILIO_ACCOUNT_SID" ||
+        process.env.TWILIO_PHONE_NUMBER === "+917416467890"
+      ) {
+        console.log(
+          "⚠️  Twilio credentials not configured - using development mode"
+        );
+        console.log("📱 SMS would be sent to:", phone);
+        console.log(
+          "📝 SMS content:",
+          `Your Bandiwala verification code is: ${verificationCode}. This code will expire in 10 minutes.`
+        );
 
         res.status(200).json({
           success: true,
@@ -265,7 +304,7 @@ async function sendVerificationCode(
           to: phone,
         });
 
-        console.log('SMS sent successfully:', smsResult.sid);
+        console.log("SMS sent successfully:", smsResult.sid);
         res.status(200).json({
           success: true,
           message: `OTP sent to ${phone}.`,
@@ -278,25 +317,31 @@ async function sendVerificationCode(
       });
     }
   } catch (error) {
-    console.error('OTP sending error:', error);
-    console.error('Error details:', {
+    console.error("OTP sending error:", error);
+    console.error("Error details:", {
       code: error.code,
       message: error.message,
       status: error.status,
-      moreInfo: error.moreInfo
+      moreInfo: error.moreInfo,
     });
 
     let errorMessage = "Verification code failed to send.";
 
     // Provide specific error messages based on the error type
     if (error.code === 21211) {
-      errorMessage = "Invalid phone number format. Please check the phone number.";
+      errorMessage =
+        "Invalid phone number format. Please check the phone number.";
     } else if (error.code === 21608) {
-      errorMessage = "The phone number is not verified with Twilio. Please use a verified number.";
+      errorMessage =
+        "The phone number is not verified with Twilio. Please use a verified number.";
     } else if (error.code === 21614) {
       errorMessage = "Invalid Twilio phone number.";
-    } else if (verificationMethod === "email" && error.message?.includes("auth")) {
-      errorMessage = "Email authentication failed. Please check email configuration.";
+    } else if (
+      verificationMethod === "email" &&
+      error.message?.includes("auth")
+    ) {
+      errorMessage =
+        "Email authentication failed. Please check email configuration.";
     }
 
     return res.status(500).json({
@@ -333,7 +378,12 @@ export const resendOTP = catchAsyncError(async (req, res, next) => {
     const { email, phone, verificationMethod } = req.body;
 
     if (!email || !phone || !verificationMethod) {
-      return next(new ErrorHandler("Email, phone, and verification method are required.", 400));
+      return next(
+        new ErrorHandler(
+          "Email, phone, and verification method are required.",
+          400
+        )
+      );
     }
 
     function validatePhoneNumber(phone) {
@@ -353,7 +403,12 @@ export const resendOTP = catchAsyncError(async (req, res, next) => {
     });
 
     if (!user) {
-      return next(new ErrorHandler("No unverified account found with this email and phone. Please register first.", 404));
+      return next(
+        new ErrorHandler(
+          "No unverified account found with this email and phone. Please register first.",
+          404
+        )
+      );
     }
 
     // Generate new verification code
@@ -446,7 +501,9 @@ export const verifyOTP = catchAsyncError(async (req, res, next) => {
     sendToken(user, 200, "Account Verified.", res);
   } catch (error) {
     console.error("OTP Verification Error:", error);
-    return next(new ErrorHandler(`Internal Server Error: ${error.message}`, 500));
+    return next(
+      new ErrorHandler(`Internal Server Error: ${error.message}`, 500)
+    );
   }
 });
 
@@ -455,7 +512,9 @@ export const login = catchAsyncError(async (req, res, next) => {
 
   // Check if either email or phone is provided along with password
   if ((!email && !phone) || !password) {
-    return next(new ErrorHandler("Email/Phone and password are required.", 400));
+    return next(
+      new ErrorHandler("Email/Phone and password are required.", 400)
+    );
   }
 
   // Validate phone number format if phone is provided
@@ -466,7 +525,9 @@ export const login = catchAsyncError(async (req, res, next) => {
     }
 
     if (!validatePhoneNumber(phone)) {
-      return next(new ErrorHandler("Invalid phone number format. Use +91XXXXXXXXXX", 400));
+      return next(
+        new ErrorHandler("Invalid phone number format. Use +91XXXXXXXXXX", 400)
+      );
     }
   }
 
@@ -492,14 +553,26 @@ export const login = catchAsyncError(async (req, res, next) => {
     const unverifiedUser = await User.findOne(unverifiedQuery);
 
     if (unverifiedUser && !unverifiedUser.accountVerified) {
-      return next(new ErrorHandler("Please verify your account first to login.", 400));
+      return next(
+        new ErrorHandler("Please verify your account first to login.", 400)
+      );
     }
 
     // If no user found at all, suggest registration
     if (email) {
-      return next(new ErrorHandler("No account found with this email. Please register to create an account.", 404));
+      return next(
+        new ErrorHandler(
+          "No account found with this email. Please register to create an account.",
+          404
+        )
+      );
     } else {
-      return next(new ErrorHandler("No account found with this phone number. Please register to create an account.", 404));
+      return next(
+        new ErrorHandler(
+          "No account found with this phone number. Please register to create an account.",
+          404
+        )
+      );
     }
   }
 
@@ -510,44 +583,51 @@ export const login = catchAsyncError(async (req, res, next) => {
 
   // Check if user is blocked
   if (user.isBlocked) {
-    return next(new ErrorHandler("Your account has been blocked. Please contact support.", 403));
+    return next(
+      new ErrorHandler(
+        "Your account has been blocked. Please contact support.",
+        403
+      )
+    );
   }
 
   // Check if vendor is approved
-  if (user.role === 'vendor' && !user.isApproved) {
-    return next(new ErrorHandler("Your vendor account is pending admin approval. Please wait for approval before accessing the system.", 403));
+  if (user.role === "vendor" && !user.isApproved) {
+    return next(
+      new ErrorHandler(
+        "Your vendor account is pending admin approval. Please wait for approval before accessing the system.",
+        403
+      )
+    );
   }
 
   sendToken(user, 200, "User logged in successfully.", res);
 });
 
 export const logout = catchAsyncError(async (req, res, next) => {
-  console.log('Logout request received');
+  console.log("Logout request received");
 
   // Set cookie options for clearing
   const cookieOptions = {
     expires: new Date(Date.now()),
     httpOnly: true,
-    path: '/',
+    path: "/",
     // In development, we need to set sameSite to 'Lax' to allow cookies to be sent in cross-site requests
     // In production, it should be 'None' with secure: true
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     // Only set secure: true in production or if explicitly configured
-    secure: process.env.NODE_ENV === 'production'
+    secure: process.env.NODE_ENV === "production",
   };
 
-  console.log('Clearing token cookie with options:', {
+  console.log("Clearing token cookie with options:", {
     sameSite: cookieOptions.sameSite,
-    secure: cookieOptions.secure
+    secure: cookieOptions.secure,
   });
 
-  res
-    .status(200)
-    .cookie("token", "", cookieOptions)
-    .json({
-      success: true,
-      message: "Logged out successfully.",
-    });
+  res.status(200).cookie("token", "", cookieOptions).json({
+    success: true,
+    message: "Logged out successfully.",
+  });
 });
 
 export const getUser = catchAsyncError(async (req, res, next) => {
@@ -571,20 +651,20 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 
   // Utility function to properly construct URLs without double slashes
   const constructUrl = (baseUrl, path) => {
-    if (!baseUrl || !path) return '';
+    if (!baseUrl || !path) return "";
 
     // Remove all trailing slashes from base URL
-    let cleanBaseUrl = baseUrl.replace(/\/+$/, '');
+    let cleanBaseUrl = baseUrl.replace(/\/+$/, "");
 
     // Remove all leading slashes from path
-    let cleanPath = path.replace(/^\/+/, '');
+    let cleanPath = path.replace(/^\/+/, "");
 
     // Construct the URL with exactly one slash
     let finalUrl = `${cleanBaseUrl}/${cleanPath}`;
 
     // Final cleanup: replace any sequence of 2+ slashes with single slash,
     // but preserve the :// in protocol
-    finalUrl = finalUrl.replace(/([^:])\/\/+/g, '$1/');
+    finalUrl = finalUrl.replace(/([^:])\/\/+/g, "$1/");
 
     return finalUrl;
   };
@@ -594,26 +674,30 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 
   // If no frontend URL is set, try to determine from the request
   if (!frontendUrl) {
-    const protocol = req.get('X-Forwarded-Proto') || req.protocol || 'http';
-    const host = req.get('X-Forwarded-Host') || req.get('Host') || 'localhost:3111';
+    const protocol = req.get("X-Forwarded-Proto") || req.protocol || "http";
+    const host =
+      req.get("X-Forwarded-Host") || req.get("Host") || "localhost:3111";
     frontendUrl = `${protocol}://${host}`;
   }
 
-  const resetPasswordUrl = constructUrl(frontendUrl, `/password/reset/${resetToken}`);
+  const resetPasswordUrl = constructUrl(
+    frontendUrl,
+    `/password/reset/${resetToken}`
+  );
 
-  console.log('🔧 Password Reset URL Debug:');
-  console.log('  - FRONTEND_URL env var:', process.env.FRONTEND_URL);
-  console.log('  - Final frontend URL:', frontendUrl);
-  console.log('  - Reset token:', resetToken);
-  console.log('  - Final reset URL:', resetPasswordUrl);
+  console.log("🔧 Password Reset URL Debug:");
+  console.log("  - FRONTEND_URL env var:", process.env.FRONTEND_URL);
+  console.log("  - Final frontend URL:", frontendUrl);
+  console.log("  - Reset token:", resetToken);
+  console.log("  - Final reset URL:", resetPasswordUrl);
 
   // Additional validation to catch any remaining double slashes
-  if (resetPasswordUrl.includes('//') && !resetPasswordUrl.includes('://')) {
-    console.error('❌ WARNING: Double slash detected in reset URL!');
-    console.error('   Original URL:', resetPasswordUrl);
+  if (resetPasswordUrl.includes("//") && !resetPasswordUrl.includes("://")) {
+    console.error("❌ WARNING: Double slash detected in reset URL!");
+    console.error("   Original URL:", resetPasswordUrl);
     // Force fix any remaining double slashes
-    const fixedUrl = resetPasswordUrl.replace(/([^:])\/\/+/g, '$1/');
-    console.error('   Fixed URL:', fixedUrl);
+    const fixedUrl = resetPasswordUrl.replace(/([^:])\/\/+/g, "$1/");
+    console.error("   Fixed URL:", fixedUrl);
   }
 
   const message = `Your Reset Password Token is:- \n\n ${resetPasswordUrl} \n\n If you have not requested this email then please ignore it.`;
@@ -694,7 +778,8 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
     if (location) {
       user.location = {
         coordinates: location.coordinates || user.location?.coordinates,
-        formattedAddress: location.formattedAddress || user.location?.formattedAddress
+        formattedAddress:
+          location.formattedAddress || user.location?.formattedAddress,
       };
     }
 
@@ -703,7 +788,7 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user
+      user,
     });
   } catch (error) {
     next(error);
@@ -713,23 +798,23 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 // Upload profile photo
 export const uploadProfilePhoto = catchAsyncError(async (req, res, next) => {
   try {
-    console.log('Upload photo request received');
-    console.log('Request body:', req.body);
-    console.log('Request file:', req.file);
-    console.log('Request files:', req.files);
-    console.log('Request headers:', req.headers);
+    console.log("Upload photo request received");
+    console.log("Request body:", req.body);
+    console.log("Request file:", req.file);
+    console.log("Request files:", req.files);
+    console.log("Request headers:", req.headers);
 
     if (!req.file) {
-      console.log('No file found in request');
+      console.log("No file found in request");
       return next(new ErrorHandler("No file uploaded", 400));
     }
 
-    console.log('File details:', {
+    console.log("File details:", {
       filename: req.file.filename,
       originalname: req.file.originalname,
       mimetype: req.file.mimetype,
       size: req.file.size,
-      path: req.file.path
+      path: req.file.path,
     });
 
     // Find the user
@@ -741,7 +826,11 @@ export const uploadProfilePhoto = catchAsyncError(async (req, res, next) => {
 
     // Delete old profile image if it exists
     if (user.profileImage) {
-      const oldImagePath = path.join(process.cwd(), 'public', user.profileImage);
+      const oldImagePath = path.join(
+        process.cwd(),
+        "public",
+        user.profileImage
+      );
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -752,16 +841,16 @@ export const uploadProfilePhoto = catchAsyncError(async (req, res, next) => {
     user.profileImage = imagePath;
     await user.save();
 
-    console.log('Profile photo updated successfully:', imagePath);
+    console.log("Profile photo updated successfully:", imagePath);
 
     res.status(200).json({
       success: true,
       message: "Profile photo updated successfully",
       user,
-      imageUrl: imagePath
+      imageUrl: imagePath,
     });
   } catch (error) {
-    console.error('Error in uploadProfilePhoto:', error);
+    console.error("Error in uploadProfilePhoto:", error);
     // If there's an error, delete the uploaded file
     if (req.file) {
       const filePath = req.file.path;
@@ -784,26 +873,26 @@ export const getAllUsers = catchAsyncError(async (req, res, next) => {
 
     let query = {};
 
-    if (role && role !== 'all') {
+    if (role && role !== "all") {
       query.role = role;
     }
 
-    if (status === 'blocked') {
+    if (status === "blocked") {
       query.isBlocked = true;
-    } else if (status === 'active') {
+    } else if (status === "active") {
       query.isBlocked = { $ne: true };
     }
 
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
       ];
     }
 
     const users = await User.find(query)
-      .select('-password -verificationCode -resetPasswordToken')
+      .select("-password -verificationCode -resetPasswordToken")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -820,9 +909,9 @@ export const getAllUsers = catchAsyncError(async (req, res, next) => {
           totalPages: Math.ceil(totalUsers / limit),
           totalUsers,
           hasNext: page < Math.ceil(totalUsers / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -852,8 +941,8 @@ export const blockUser = catchAsyncError(async (req, res, next) => {
         email: user.email,
         phone: user.phone,
         isBlocked: user.isBlocked,
-        blockReason: user.blockReason
-      }
+        blockReason: user.blockReason,
+      },
     });
   } catch (error) {
     next(error);
@@ -881,8 +970,8 @@ export const unblockUser = catchAsyncError(async (req, res, next) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
-        isBlocked: user.isBlocked
-      }
+        isBlocked: user.isBlocked,
+      },
     });
   } catch (error) {
     next(error);
@@ -914,7 +1003,7 @@ export const getUserOrderHistory = catchAsyncError(async (req, res, next) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          phone: user.phone
+          phone: user.phone,
         },
         orders,
         pagination: {
@@ -922,9 +1011,9 @@ export const getUserOrderHistory = catchAsyncError(async (req, res, next) => {
           totalPages: Math.ceil(totalOrders / limit),
           totalOrders,
           hasNext: page < Math.ceil(totalOrders / limit),
-          hasPrev: page > 1
-        }
-      }
+          hasPrev: page > 1,
+        },
+      },
     });
   } catch (error) {
     next(error);
@@ -940,11 +1029,6 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    // Don't allow deleting admin users
-    if (user.role === 'admin') {
-      return next(new ErrorHandler("Cannot delete admin users", 403));
-    }
-
     // Delete user's orders, reviews, etc. (optional - you might want to keep for records)
     // await Order.deleteMany({ userId });
     // await Review.deleteMany({ userId });
@@ -953,7 +1037,7 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "User deleted successfully"
+      message: "User deleted successfully",
     });
   } catch (error) {
     next(error);
