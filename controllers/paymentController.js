@@ -46,7 +46,7 @@ export const createPaymentOrder = catchAsyncError(async (req, res, next) => {
     }, 0);
 
     // Add platform fee and initial delivery charge
-    const platformFee = 5;
+    const platformFee = 10;
     let deliveryCharge = 20;
     let discount = 0;
 
