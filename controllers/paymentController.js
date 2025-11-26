@@ -64,8 +64,7 @@ export const createPaymentOrder = catchAsyncError(async (req, res, next) => {
     }
 
     // Calculate tax on adjusted amounts (matching frontend calculation)
-    const taxableAmount = cartSubtotal + platformFee + deliveryCharge;
-    const tax = parseFloat((taxableAmount * 0.05).toFixed(2));
+    const tax = parseFloat((cartSubtotal * 0.05+platformFee*0.18+deliveryCharge*0.18).toFixed(2));
     const finalTotal = cartSubtotal + platformFee + deliveryCharge + tax - discount;
 
     console.log('Payment validation totals:', {
