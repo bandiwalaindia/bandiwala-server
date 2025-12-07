@@ -63,35 +63,10 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the public directory
-app.use(express.static("public"));
-
-// Serve bandiwala items pics
-app.use(
-  "/bandiwala-items-pics",
-  express.static("public/bandiwala-items-pics", {
-    setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Cache-Control", "public, max-age=31536000");
-    },
-  })
-);
-
-// Serve uploads for profile images
+// Serve uploads for profile images only (user-uploaded content)
 app.use(
   "/uploads",
   express.static("public/uploads", {
-    setHeaders: (res) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Cache-Control", "public, max-age=31536000");
-    },
-  })
-);
-
-// Serve default images
-app.use(
-  "/images",
-  express.static("public/images", {
     setHeaders: (res) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Cache-Control", "public, max-age=31536000");
